@@ -95,6 +95,8 @@ units TEXT,
 type TEXT
 );
 
+/*Now lets insert the data from the cvs file we have for this project */
+
 COPY conditions(start, stop, patient_id, encounter_id, code, description)
 FROM 'C:\Program Files\PostgreSQL\17\data\conditions.csv'
 DELIMITER ','
@@ -119,3 +121,4 @@ CREATE INDEX idx_patient_id_conditions ON conditions(patient_id);
 CREATE INDEX idx_patient_id_medications ON medications(patient_id);
 CREATE INDEX idx_patient_id_procedures ON procedures(patient_id);
 CREATE INDEX idx_patient_id_observations ON observations(patient_id);
+
