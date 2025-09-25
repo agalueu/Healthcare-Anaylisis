@@ -60,6 +60,14 @@ Which conditions are most associated with readmissions?
 
 Clone this repository.
 
+To get the data as it is too big to import in this repository you can go to https://synthea.mitre.org/downloads, and download COVID-19 10K, CSV | [mirror]: 54 MB, then if you want just pick this files in order to replicate this results:
+- patients
+- conditions
+- -encounters
+- medications
+- observations
+- procedures
+
 Load the CSV files into PostgreSQL using the provided COPY statements.
 
 Run the SQL queries in sql/.
