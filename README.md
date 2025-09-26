@@ -49,10 +49,10 @@ Database: The CSVs were imported into PostgreSQL and structured following the pr
 4. Run SQL scripts from the queries/ folder.
 5. Open Power BI and connect it to PostgreSQL for visualization.
 
-🔗 Relationships (ERD)
+### 🔗 Relationships (ERD)
 The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /erd folder for visualization of table relationships.
 
-📈 Power BI Dashboard
+### 📈 Power BI Dashboard
 An interactive dashboard was created in Power BI to visualize key insights such as patient demographics, condition and prescription prevalence, most observations on patients and some more. This dashboard translates SQL queries into intuitive charts for business users.
 
 Overall sample: [Overall Chart](images/overall_dashboard.png)
