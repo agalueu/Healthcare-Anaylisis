@@ -1,103 +1,67 @@
-Healthcare Analytics Project
 📌 Overview
-
-This project analyzes hospital encounters, conditions, treatments, and medications to generate insights into patient care, healthcare costs, and disease patterns.
-
-The analysis is based on a synthetic healthcare dataset (COVID-19 focused) commonly used in analytics practice.
+This project analyzes synthetic healthcare data to uncover patient demographics, condition prevalence, medication usage, hospital stay patterns, procedure demand, and year-over-year trends. The goal is to simulate real-world healthcare analytics and demonstrate SQL, data modeling, and visualization skills.
 
 📊 Dataset
+The dataset includes anonymized healthcare records with the following entities:
 
-The dataset comes from a public healthcare simulation dataset that includes information on patients and their medical history.
+Patients → demographic information (birthdate, gender, city, etc.)
 
-Main tables used:
+Conditions → medical conditions diagnosed per patient
 
-patients 🧍 – demographics and baseline information.
+Medications → prescriptions issued to patients
 
-encounters 🏥 – hospital visits (start/stop times, costs, reasons).
+Encounters → hospital visits, admissions, and length of stay
 
-conditions ⚕️ – diagnoses and chronic conditions.
-
-procedures 🩺 – treatments/procedures linked to encounters.
-
-medications 💊 – prescribed drugs with costs and coverage.
-
-observations 📊 – lab results, vitals, and other recorded measurements.
-
-The original CSV files were loaded into PostgreSQL using COPY commands.
+Procedures → medical procedures performed
 
 🛠️ Tools & Technologies
 
-PostgreSQL → SQL queries and data transformations.
+PostgreSQL → database storage and querying
 
-Power BI → Dashboards and interactive reports.
+SQL (CTEs, Window Functions, Aggregations) → data analysis
 
-GitHub → Documentation and version control.
+Power BI → interactive dashboards and data visualization
+
+dbdiagram.io → Entity Relationship Diagram (ERD)
 
 ❓ Key Business Questions
 
-What are the most common conditions diagnosed across patients?
+What is the distribution of patients by age group and gender?
 
-How do hospital encounter costs vary by encounter type?
+What are the most common medical conditions?
 
-What are the most frequently prescribed medications and their costs?
+How does medication usage vary by age group, gender, and geography?
 
-How long are patients typically staying in hospital by condition?
+What are the typical hospital stay durations for different conditions?
 
-Are there cost differences across patient demographics (age, gender, race)?
+Which procedures are most common in each city?
 
-What are the most common lab observations for COVID-related encounters?
-
-Which conditions are most associated with readmissions?
+How do conditions grow or decline year-over-year by age group?
 
 📂 Repository Structure
-├── README.md                # Project overview (this file)  
-├── analysis_resume.md       # Query goals, logic, and insights  
-├── sql/                     # SQL scripts for analysis  
-├── powerbi/                 # PBIX dashboard file  
-└── images/                  # Screenshots of dashboards  
+
+├── data/                 # Raw dataset files
+├── queries/              # SQL scripts for analysis
+├── analysis/             # Query analysis & documentation
+├── dashboard/            # Power BI files and visuals
+├── erd/                  # Entity Relationship Diagram
+└── README.md             # Project documentation
+
 
 🔄 How to Reproduce
 
 Clone this repository.
 
-To get the data as it is too big to import in this repository you can go to https://synthea.mitre.org/downloads, and download COVID-19 10K, CSV | [mirror]: 54 MB, then if you want just pick this files in order to replicate this results:
-- patients
-- conditions
-- -encounters
-- medications
-- observations
-- procedures
+Create the database schema in PostgreSQL.
 
-Load the CSV files into PostgreSQL using the provided COPY statements.
+Load the dataset into the respective tables.
 
-Run the SQL queries in sql/.
+Run SQL scripts from the queries/ folder.
 
-Connect Power BI to PostgreSQL and build the dashboard.
+Open Power BI and connect it to PostgreSQL for visualization.
 
 🔗 Relationships (ERD)
-
-The project uses a snowflake schema with:
-
-patients as the main entity,
-
-linked to encounters,
-
-which in turn connect to conditions, procedures, medications, and observations.
-
-This structure allows analyzing patients from both a clinical and cost perspective.
+The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /erd folder for visualization of table relationships.
 
 📈 Power BI Dashboard
-
-The dashboard provides:
-
-Condition prevalence by patient demographics.
-
-Encounter and treatment cost analysis.
-
-Medication utilization and cost coverage.
-
-Observation patterns for COVID-related cases.
-
-Patient journey mapping across encounters.
-
-📷 Screenshots are available in the images/ folder.
+An interactive dashboard was created in Power BI to visualize key insights such as patient demographics, condition prevalence, prescription trends, and year-over-year growth. This dashboard translates SQL queries into intuitive charts for business users.
