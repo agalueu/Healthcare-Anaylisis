@@ -33,16 +33,15 @@ Database: The CSVs were imported into PostgreSQL and structured following the pr
 5 Which procedures are most common in each city?
 6. How do conditions grow or decline year-over-year by age group?
 
-All these questions are analysed on [Analysis resume](Analysis._resume.md)
+All these questions are analysed on [Analysis resume](main/Analysis._resume.md)
 for queries [Analysis](sql/Analysis.sql)
 
 ### 📂 Repository Structure
-├── docs/                 # ERD
-├── images/               # Shared quieries results and dahsboards **from power BI**
-├── sql/                  # SQL scripts for schema & insert data
-├── Analysis_resume.md    # All queries analysis used for this repository
-├── README.md             # Project documentation
-
+docs/                  → ERD  
+images/                → screenshots of dashboards (Power BI) and query results (pgAdmin)
+sql/                   → database schema, load script, and analysis queries
+Analysis_resume.md     → All queries analysis used for this repository
+README.md              → project summary and instructions  
 
 ### 🔄 How to Reproduce
 1. Clone this repository.
