@@ -33,7 +33,7 @@ Database: The CSVs were imported into PostgreSQL and structured following the pr
 5 Which procedures are most common in each city?
 6. How do conditions grow or decline year-over-year by age group?
 
-All these questions are analysed on [Analysis resume](main/Analysis._resume.md)
+All these questions are analysed on [Analysis resume](main/Analysis_resume.md)
 for queries [Analysis](sql/Analysis.sql)
 
 ### 📂 Repository Structure
