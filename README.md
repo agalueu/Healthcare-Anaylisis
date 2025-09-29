@@ -44,7 +44,9 @@ for queries [Analysis](sql/Analysis.sql)
 - README.md              → project summary and instructions  
 
 ### 🔗 Relationships (ERD)
-The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /erd folder for visualization of table relationships.
+The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /docs folder for visualization of table relationships.
+
+![ERD](docs/ERD.png)
 
 
 ### 🔄 How to Reproduce
