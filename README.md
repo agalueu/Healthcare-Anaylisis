@@ -43,15 +43,18 @@ for queries [Analysis](sql/Analysis.sql)
 - Analysis_resume.md     → All queries analysis used for this repository
 - README.md              → project summary and instructions  
 
-### 🔄 How to Reproduce
-1. Clone this repository.
-2. Create the database schema in PostgreSQL.
-3. Load the dataset into the respective tables.
-4. Run SQL scripts from the queries/ folder.
-5. Open Power BI and connect it to PostgreSQL for visualization.
-
 ### 🔗 Relationships (ERD)
 The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /erd folder for visualization of table relationships.
+
+
+### 🔄 How to Reproduce
+- Create a PostgreSQL database:
+      * In pgAdmin → right-click Databases → Create - Database → name it `Healthcare` (or any name you preffer).
+- Schema & Data Import:
+      * Run the schema script in [SCHEMA](sql/SCHEMA.sql) to create all tables and insert data.
+- Sample queries:
+      * Analytical SQL queries are available in [Analysis](sql/Analysis.sql).
+      * These queries can be run in pgAdmin or connected directly to Power BI for visualization.
 
 ### 📈 Power BI Dashboard
 An interactive dashboard was created in Power BI to visualize key insights such as patient demographics, condition and prescription prevalence, most observations on patients and some more. This dashboard translates SQL queries into intuitive charts for business users.
