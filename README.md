@@ -1,4 +1,4 @@
-# Healthcare Analytics
+# 🏥 Healthcare Analytics
 ### 📌 Overview
 This project analyzes synthetic healthcare data to uncover patient demographics, condition prevalence, medication usage, hospital stay patterns, procedure demand, and year-over-year trends. The goal is to simulate real-world healthcare analytics and demonstrate SQL, data modeling, and visualization skills.
 
@@ -18,6 +18,9 @@ Data format: CSV files for patients, conditions, medications, encounters, and pr
 Database: The CSVs were imported into PostgreSQL and structured following the provided [SQUEMA](sql/SCHEMA.sql)
 
 ⚠️ Note: The raw CSV files are not included in this repository due to size limits. Please download them directly from the official Synthea project and load into PostgreSQL to reproduce the analysis.
+
+### 🌐 Original Data Source
+The dataset was obtained from a synthetic healthcare data generator (Synthea). It includes patient demographics, encounters, procedures, conditions, and medications.
 
 ### 🛠️ Tools & Technologies
 - PostgreSQL → database storage and querying
@@ -43,11 +46,16 @@ for queries [Analysis](sql/Analysis.sql)
 - Analysis_resume.md     → All queries analysis used for this repository
 - README.md              → project summary and instructions  
 
-### 🔗 Relationships (ERD)
-The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /docs folder for visualization of table relationships.
+### 🗄 Database Schema & ERD
 
+The database contains tables for patients, encounters, conditions, procedures, medications, and observations.
+The ERD illustrates relationships such as one patient having multiple encounters, and each encounter being linked to procedures and conditions.
+
+### 📌 Entity-Relationship Diagram (ERD):
 ![ERD](docs/ERD.png)
 
+### 🔗 Relationships (ERD)
+The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /docs folder for visualization of table relationships.
 
 ### 🔄 How to Reproduce
 - Create a PostgreSQL database:
@@ -62,3 +70,8 @@ The database schema connects patients with their encounters, conditions, medicat
 An interactive dashboard was created in Power BI to visualize key insights such as patient demographics, condition and prescription prevalence, most observations on patients and some more. This dashboard translates SQL queries into intuitive charts for business users.
 
 Overall sample: [Overall Chart](images/overall_dashboard.png)
+
+### ✅ Key Takeaways
+- Age and comorbidities strongly influence hospitalization rates.
+- Preventive care reduces readmission likelihood.
+- Certain conditions (e.g., chronic diseases) are linked to longer treatment durations.
