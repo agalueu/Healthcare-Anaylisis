@@ -1,6 +1,6 @@
 In this section I´m going to talk about some results in the different queries that i did in the [Query Analysis](sql/Analysis.sql) file, what was the purpose, steps to do it and business insight for this analysis
 
-# 1️⃣ Age & Gender Distribution
+# 1. Age & Gender Distribution
 ### 📝 Query Goal
 To analyze the distribution of patients by age group and gender.
 
@@ -15,7 +15,7 @@ To analyze the distribution of patients by age group and gender.
 
 Sample img: [Age & Gender Distribution](images/1_age_gender_distribution.png)
 
-# 2️⃣ Most Common Conditions
+# 2. Most Common Conditions
 ### 📝 Query Goal
 To identify the most frequently diagnosed conditions across patients.
 
@@ -32,7 +32,7 @@ To identify the most frequently diagnosed conditions across patients.
 
 Sample img: [Most Common Conditions](images/2_most_common_conditions.png)
 
-# 3️⃣ Medication Frequency by Age Group & Gender
+# 3. Medication Frequency by Age Group & Gender
 ### 📝 Query Goal
 To determine how frequently medications are prescribed across age groups and genders.
 
@@ -49,7 +49,7 @@ To determine how frequently medications are prescribed across age groups and gen
 
 Sample img: [Medication Frequency by Age Group & Gender](images/3_medication_frequency.png)
 
-# 4️⃣ Hospital Stay Duration by Condition
+# 4. Hospital Stay Duration by Condition
 ### 📝 Query Goal
 To analyze the average, minimum, and maximum hospital stay per patient per condition.
 
@@ -65,7 +65,7 @@ To analyze the average, minimum, and maximum hospital stay per patient per condi
 
 Sample img: [Hospital Stay Duration by Condition](images/4_hospital_stay.png)
 
-# 5️⃣ Medications by Geography (City)
+# 5. Medications by Geography (City)
 ### 📝 Query Goal
 To analyze medication prescriptions by city and their proportion of total prescriptions.
 
@@ -81,7 +81,7 @@ To analyze medication prescriptions by city and their proportion of total prescr
 
 Sample img: [Medications by Geography](images/5_medications_geography.png)
 
-# 6️⃣ Common Procedures by City
+# 6. Common Procedures by City
 ### 📝 Query Goal
 To determine which procedures are most common in each city relative to the population.
 
@@ -97,7 +97,7 @@ To determine which procedures are most common in each city relative to the popul
 
 Sample img: [Common Procedures by City](images/6_common_procedures.png)
 
-# 7️⃣ Year-over-Year Growth per Condition (by Age Group)
+# 7. Year-over-Year Growth per Condition (by Age Group)
 ### 📝 Query Goal
 To track the year-over-year growth of conditions per age group.
 
