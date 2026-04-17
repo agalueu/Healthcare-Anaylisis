@@ -1,175 +1,177 @@
---1. Profit hotspot (TOP and BOTTOM KPIs on power BI)
-WITH sales AS (
-	SELECT  c.region, c.segment, 
-			ROUND(SUM(od.sales), 2) AS total_sales, --total sales per region/segment
-			ROUND(SUM(od.profit), 2) AS total_profit --total profit per region/segment
-	FROM customers c
-	JOIN orders o ON c.customer_id = o.customer_id --inner JOIN just because we want only customers that has an order
-	JOIN order_details od ON o.order_id = od.order_id --only orders that has an order details
-	GROUP BY c.region, c.segment
+/*For technical purposses and cleaner queries i will create a view with the information about patient_id,
+age, age group, and city, so this way we just join the tables we want to study into this one*/
+
+-- Reusable demographic view
+CREATE OR REPLACE VIEW demographic AS
+WITH age AS (
+    SELECT  patient_id,
+            city,
+            gender,
+            CASE
+                WHEN deathdate IS NOT NULL THEN EXTRACT(YEAR FROM AGE(deathdate, birthdate))
+                ELSE EXTRACT(YEAR FROM AGE(CURRENT_DATE, birthdate))
+            END AS age
+    FROM patients
+),
+age_groups AS (
+    SELECT *,
+           CASE
+               WHEN age BETWEEN 0 AND 18 THEN '0-18'
+               WHEN age BETWEEN 19 AND 35 THEN '19-35'
+               WHEN age BETWEEN 36 AND 50 THEN '36-50'
+               WHEN age BETWEEN 51 AND 65 THEN '51-65'
+               WHEN age > 65 THEN '65+'
+           END AS age_group
+    FROM age
 )
+SELECT patient_id AS patient_id,
+       gender,
+       age,
+       age_group,
+       city
+FROM age_groups;
 
-SELECT  region AS "Region",
-		segment AS "Segment",
-		total_sales AS "Total Sales",
-		total_profit AS "Total Profit",
-		ROUND(total_profit/total_sales * 100, 2) AS "Profit Margin"
-FROM sales
-ORDER BY "Profit Margin" DESC, region, segment;
+--1. Age, gender distribution
+SELECT  age_group,
+		COUNT(patient_id),
+		gender
+FROM demographic
+GROUP BY age_group, gender
+ORDER BY age_group
 
---2. total sales per product
-SELECT  p.product_name,
-		EXTRACT(YEAR FROM (o.order_date)) AS year,
-		SUM(sales) AS total_sales
-FROM products p
-JOIN order_details oi ON p.product_id = oi.product_id
-JOIN orders o ON oi.order_id = o.order_id
-GROUP BY p.product_name, EXTRACT(YEAR FROM (o.order_date))
-ORDER BY total_sales DESC
-/*the ORDER BY clause will show in the table the result we want, for example, if we want the product that performance more sales per year, we should
-do ORDER BY year, total_sales DESC, if we want the product that overall the years performance the most selling just do ORDER BY total_sales DESC*/
+--2. What are the most common conditions diagnosed across patients?
+SELECT  COUNT(condition_id) AS condition_counter,
+		description,
+		COUNT(DISTINCT patient_id) AS patients_per_condition,
+		ROUND(COUNT(condition_id)::DECIMAL/COUNT(DISTINCT patient_id), 2) AS avg_record_per_patient
+FROM conditions
+GROUP BY description
+ORDER BY condition_counter DESC;
 
---3. Sales trends by Category
-WITH sales AS (
-	SELECT p.category, EXTRACT (YEAR FROM (o.order_date)) AS year, ROUND(SUM(od.sales), 2) AS total_sales
-	FROM products p
-	JOIN order_details od ON p.product_id = od.product_id
-	JOIN orders o ON od.order_id = o.order_id
-	GROUP BY p.category, EXTRACT (YEAR FROM (o.order_date))
+
+--3. Medication frequency by age group & gender
+SELECT  m.description,
+        d.gender,
+        d.age_group,
+        COUNT(*) AS total_prescriptions,
+        COUNT(DISTINCT d.patient_id) AS unique_patients,
+        ROUND(COUNT(DISTINCT d.patient_id)::DECIMAL / NULLIF(COUNT(*), 0) * 100, 2) AS pct_unique_of_total
+FROM medications m
+JOIN demographic d ON m.patient_id = d.patient_id
+GROUP BY m.description, d.gender, d.age_group;
+
+--4. How long are patients typically staying in hospital by condition? (exclude extreme outliers (LOS > 365 days)
+SELECT  
+    description,
+    patient_id,
+    ROUND(AVG(EXTRACT(EPOCH FROM (stop - start)) / 86400), 2) AS avg_stay_days,
+    ROUND(MIN(EXTRACT(EPOCH FROM (stop - start)) / 86400), 2) AS min_stay_days,
+    ROUND(MAX(EXTRACT(EPOCH FROM (stop - start)) / 86400), 2) AS max_stay_days,
+    COUNT(*) AS total_encounters
+FROM encounters
+WHERE stop IS NOT NULL 
+  AND stop > start
+  AND (stop - start) < INTERVAL '365 days'  -- cap unrealistic values
+GROUP BY description, patient_id
+ORDER BY avg_stay_days DESC;
+
+--5. Medications by geography (city)
+WITH table_1 AS (
+	SELECT  m.description,
+			COUNT(DISTINCT p.patient_id) AS unique_prescriptions,
+			p.city
+	FROM patients p
+	JOIN medications m ON p.patient_id = m.patient_id
+	GROUP BY m.description, p.city
 ),
 
-preview AS (
-	SELECT *, LAG (total_sales) OVER (PARTITION BY category ORDER BY year) AS previews_value
-	FROM sales
+table_2 AS (
+SELECT  m.description,
+			COUNT(p.patient_id) AS total_prescriptions,
+			p.city
+	FROM patients p
+	JOIN medications m ON p.patient_id = m.patient_id
+	GROUP BY m.description, p.city
 )
 
-SELECT  category AS "Category",
-		year AS "Year",
-		total_sales AS "Total Sales",
-		ROUND((total_sales - previews_value)/NULLIF(previews_value, 0) * 100, 2) AS "YoY Growth"
-FROM preview;
+SELECT  t1.description,
+		t1.city,
+		t1.unique_prescriptions,
+		t2.total_prescriptions,
+		ROUND(t1.unique_prescriptions::DECIMAL / t2.total_prescriptions * 100, 2) AS percentage_prescription
+FROM table_1 t1
+JOIN table_2 t2 ON t1.description = t2.description
+				AND t1.city = t2.city;
 
---4. Compute YoY growth for both sales and profit. AND show rank changes from the previous year for each category
---This is showing on power BI in rank changes over years and year over year Growth
-WITH sales AS (
-	SELECT  p.category,
-		c.region,
-		EXTRACT (YEAR FROM(o.order_date)) AS year,
-		ROUND(SUM(od.sales), 2) AS total_sales,
-		ROUND(SUM(od.profit), 2) AS total_profit
-	FROM customers c
-	JOIN orders o ON c.customer_id = o.customer_id
-	JOIN order_details od ON o.order_id = od.order_id
-	JOIN products p ON od.product_id = p.product_id
-	GROUP BY p.category, c.region, EXTRACT (YEAR FROM(o.order_date))
+
+--6. Analyze which procedures are common in each city, state, or country
+WITH table_1 AS (
+	SELECT p.description, COUNT(DISTINCT p.patient_id) AS unique_patients, px.city
+	FROM patients px
+	JOIN procedures p ON px.patient_id = p.patient_id
+	GROUP BY p.description, px.city
+	ORDER BY COUNT(DISTINCT p.patient_id) DESC
+),
+
+table_2 AS (
+	SELECT COUNT(patient_id) AS population, city
+	FROM patients
+	GROUP BY city
+)
+
+SELECT  t1.description,
+		t1.city,
+		t1.unique_patients,
+		t2.population,
+		ROUND(t1.unique_patients::DECIMAL / t2.population * 100, 2) AS percentage_patients
+FROM table_1 t1
+JOIN table_2 t2 ON t1.city = t2.city;
+
+
+--7. Year-over-Year Growth per Condition (by Age Group)
+WITH patient_age_group AS (
+    -- Total patients per age group (denominator for percentages)
+    SELECT age_group, COUNT(patient_id) AS total_patients_per_age_group
+    FROM demographic
+    GROUP BY age_group
+),
+
+total AS (
+    -- Unique patients per condition per year per age group
+    SELECT  
+        d.age_group,
+        c.description,
+        EXTRACT(YEAR FROM c.start) AS year,
+        COUNT(DISTINCT d.patient_id) AS unique_patients,
+        p.total_patients_per_age_group,
+        ROUND(
+            COUNT(DISTINCT d.patient_id)::DECIMAL / NULLIF(p.total_patients_per_age_group, 0) * 100,
+            2
+        ) AS pct_patients
+    FROM conditions c
+    JOIN demographic d ON c.patient_id = d.patient_id
+    JOIN patient_age_group p ON d.age_group = p.age_group
+    GROUP BY d.age_group, c.description, EXTRACT(YEAR FROM c.start), p.total_patients_per_age_group
 ),
 
 ranked AS (
-	SELECT  *,
-		RANK () OVER (PARTITION BY region, year ORDER BY total_sales DESC) AS rank_by_sales,
-		RANK () OVER (PARTITION BY region, year ORDER BY total_profit DESC) AS rank_by_profit,
-		SUM(total_sales) OVER (PARTITION BY region, category ORDER BY year) AS cumulative_sales,
-		COALESCE(LAG (total_sales) OVER (PARTITION BY region, category ORDER BY year), 0) AS previews_sale,
-		COALESCE(LAG (total_profit) OVER (PARTITION BY region, category ORDER BY year), 0) AS previews_profit
-	FROM sales
-),
-
-final_results AS (
-	SELECT  *,
-		COALESCE(ROUND((total_sales - previews_sale)/NULLIF(previews_sale, 0) * 100, 2), 0) AS YoY_sales,
-		COALESCE(ROUND((total_profit - previews_profit)/NULLIF(previews_profit, 0) * 100, 2), 0) AS YoY_profit,
-		LAG (rank_by_sales) OVER (PARTITION BY region, category ORDER BY year) AS previews_rank_sale,
-		LAG (rank_by_profit) OVER (PARTITION BY region, category ORDER BY year) AS previews_rank_profit
-	FROM ranked
+    -- Previous year's percentage for YoY growth calculation
+    SELECT  
+        *,
+        LAG(pct_patients) OVER (PARTITION BY age_group, description ORDER BY year) AS previous_pct
+    FROM total
 )
 
-SELECT  category AS "Category",
-		region AS "Region",
-		year AS "Year",
-		total_sales AS "Total Sales",
-		total_profit AS "Total Profit",
-		cumulative_sales AS "Cumulative Sales",
-		yoy_sales AS "Year over Year Growth by sales",
-		yoy_profit AS "Year over Year Growth by profit",
-		--previews_rank_sale,
-		rank_by_sales AS "Rank by Sales",
-		--previews_rank_profit,
-		rank_by_profit AS "Rank by Profit",
-		-1 * (rank_by_sales - previews_rank_sale) AS "Rank changes by Sales",
-		-1 * (rank_by_profit - previews_rank_profit) AS "Rank changes by Profit"
-FROM final_results
-ORDER BY category, region, year;
-
---5. Highlight the top-selling category each year.
-WITH total AS (
-	SELECT /*p.product_name,*/ p.category, EXTRACT(YEAR FROM (o.order_date)) AS year, SUM(od.sales) AS total_sales, SUM(od.profit) AS total_profit
-	FROM products p
-	JOIN order_details od ON p.product_id = od.product_id
-	JOIN orders o ON od.order_id = o.order_id
-	GROUP BY /*p.product_name,*/ p.category, EXTRACT(YEAR FROM (o.order_date))
-),
-
-ranked As (
-	SELECT  *,
-			DENSE_RANK () OVER (PARTITION BY year ORDER BY total_sales DESC) AS rank
-	FROM total
-)
-
-SELECT  category AS "Category",
-		year AS "Year",
-		total_sales AS "Total Sales",
-		total_profit AS "Total Profit",
-		rank AS "Rank"
+SELECT  
+    age_group,
+    description,
+    year,
+    unique_patients,
+    total_patients_per_age_group,
+    pct_patients,
+    ROUND(
+        (pct_patients - previous_pct) / NULLIF(previous_pct, 0) * 100,
+        2
+    ) AS growth
 FROM ranked
-WHERE rank = 1;
-
---Key business question
---6. Which product categories and subcategories drive the most profit?
-WITH sales AS (
-	SELECT  p.category,
-		c.region,
-		EXTRACT (YEAR FROM(o.order_date)) AS year,
-		ROUND(SUM(od.sales), 2) AS total_sales,
-		ROUND(SUM(od.profit), 2) AS total_profit
-	FROM customers c
-	JOIN orders o ON c.customer_id = o.customer_id
-	JOIN order_details od ON o.order_id = od.order_id
-	JOIN products p ON od.product_id = p.product_id
-	GROUP BY p.category, c.region, EXTRACT (YEAR FROM(o.order_date))
-)
-
-SELECT  category AS "Category",
-		region AS "Region",
-		year AS "Year",
-		total_sales AS "Total Sales",
-		total_profit AS "Total Profit",
-		RANK () OVER (PARTITION BY region, year ORDER BY total_sales DESC) AS "Rank by Sales",
-		RANK () OVER (PARTITION BY region, year ORDER BY total_profit DESC) AS "Rank by Profit"
-FROM sales;
-
---7. What customer segments and region combined are most valuable?
-WITH ranked AS (
-	SELECT  c.region, c.segment,
-			ROUND(SUM(od.sales), 2) AS total_sales,
-			ROUND(SUM(od.profit), 2) AS total_profit, 
-			ROUND(  SUM(od.profit)/SUM(od.sales) * 100, 2) AS profit_margin_pct,
-			DENSE_RANK () OVER (PARTITION BY c.region ORDER BY SUM(od.sales) DESC) AS rank_by_sales,
-			DENSE_RANK () OVER (PARTITION BY c.region ORDER BY SUM(od.profit) DESC) AS rank_by_profit,
-			DENSE_RANK () OVER (PARTITION BY c.region ORDER BY (SUM(od.profit)/SUM(od.sales)) DESC) AS rank_by_margin
-	FROM customers c
-	JOIN orders o ON c.customer_id = o.customer_id
-	JOIN order_details od ON o.order_id = od.order_id
-	GROUP BY c.region, c.segment
-)
-
-SELECT  region AS "Region",
-		segment AS "Segment",
-		total_sales AS "Total Sales",
-		total_profit AS "Total Profit",
-		rank_by_sales AS "Rank by Sales",
-		rank_by_profit AS "Rank by Profit",
-		rank_by_margin AS "Margin Rank",
-		(rank_by_sales + rank_by_profit + rank_by_margin) / 3 AS "Overall Performer"
-FROM ranked
-
-ORDER BY region, "Overall Performer";
+ORDER BY age_group, year, description;
