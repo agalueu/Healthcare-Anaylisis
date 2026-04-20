@@ -192,4 +192,4 @@ SELECT
         2
     ) AS growth
 FROM ranked
-ORDER BY age_group, year, description;
+ORDER BY age_group, description, year;
