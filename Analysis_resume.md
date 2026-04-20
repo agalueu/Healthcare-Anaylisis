@@ -1,115 +1,149 @@
-In this section I´m going to talk about some results in the different queries that i did in the [Query Analysis](sql/Analysis.sql) file, what was the purpose, steps to do it and business insight for this analysis
+# 📊 Analysis Summary
 
-# 1. Age & Gender Distribution
-### 📝 Query Goal
-To analyze the distribution of patients by age group and gender.
+This document explains the analytical queries implemented in `sql/analysis.sql`, including their objectives, logic, and business insights.
 
-### ⚙️ Steps / Logic
-- Use the demographic view to get patient age, age group, and gender.
-- GROUP BY age_group, gender → counts the number of patients per combination.
-- ORDER BY age_group → displays age groups in ascending order.
+---
 
-### 📊 Business Insights
-- Shows patient demographics for hospital planning and resource allocation.
-- Helps identify age or gender segments that require specialized care.
+## 1. Age & Gender Distribution
 
-Sample img: [Age & Gender Distribution](images/1_age_gender_distribution.png)
+### 📝 Goal
 
-# 2. Most Common Conditions
-### 📝 Query Goal
-To identify the most frequently diagnosed conditions across patients.
+Analyze patient distribution by age group and gender.
 
-### ⚙️ Steps / Logic
-- Count all condition records per description.
-- Count distinct patients per condition.
-- Calculate average records per patient (COUNT(condition_id) / COUNT(DISTINCT patient_id)).
-- ORDER BY condition_counter DESC → most common conditions first.
+### ⚙️ Logic
 
-### 📊 Business Insights
-- Highlights prevalent conditions for population health management.
-- Supports prioritization of treatments, staff, and medication stock.
-- Can guide preventive healthcare strategies.
+* Use the demographic view to retrieve age, age group, and gender
+* Group by age_group and gender
+* Count total patients per segment
 
-Sample img: [Most Common Conditions](images/2_most_common_conditions.png)
+### 📊 Insight
 
-# 3. Medication Frequency by Age Group & Gender
-### 📝 Query Goal
-To determine how frequently medications are prescribed across age groups and genders.
+Provides a demographic overview to support resource allocation and targeted healthcare planning.
 
-### ⚙️ Steps / Logic
-- Join medications table with the demographic view.
-- Count total prescriptions (COUNT(*)) and unique patients (COUNT(DISTINCT patient_id)).
-- Calculate percentage of unique patients per medication.
-- Group by medication, gender, and age group.
+Sample:
+[Age & Gender Distribution](images/1_age_gender_distribution.png)
 
-### 📊 Business Insights
-- Reveals prescribing patterns by demographic segments.
-- Helps identify over- or under-prescribed medications.
-- Useful for targeted patient education or intervention programs.
+---
 
-Sample img: [Medication Frequency by Age Group & Gender](images/3_medication_frequency.png)
+## 2. Most Common Conditions
 
-# 4. Hospital Stay Duration by Condition
-### 📝 Query Goal
-To analyze the average, minimum, and maximum hospital stay per patient per condition.
+### 📝 Goal
 
-### ⚙️ Steps / Logic
-- Filter encounters with valid start and stop times, excluding extreme outliers (>365 days).
-- Calculate avg_stay_days, min_stay_days, max_stay_days using EXTRACT(EPOCH FROM (stop - start)) / 86400.
-- Group by patient and condition to get per-patient averages.
+Identify the most frequently diagnosed conditions.
 
-### 📊 Business Insights
-- Highlights conditions that require longer hospitalizations.
-- Supports capacity planning, staffing, and resource allocation.
-- Helps identify unusual cases that may need further investigation.
+### ⚙️ Logic
 
-Sample img: [Hospital Stay Duration by Condition](images/4_hospital_stay.png)
+* Count total condition records per description
+* Count distinct patients per condition
+* Compute average records per patient
 
-# 5. Medications by Geography (City)
-### 📝 Query Goal
-To analyze medication prescriptions by city and their proportion of total prescriptions.
+### 📊 Insight
 
-### ⚙️ Steps / Logic
-- Count unique patients and total prescriptions per medication per city.
-- Calculate the percentage of unique prescriptions relative to total prescriptions.
-- Use CTEs (table_1 & table_2) to organize numerator and denominator.
+Highlights prevalent conditions and supports prioritization of treatments and preventive strategies.
 
-### 📊 Business Insights
-- Reveals geographic patterns in medication usage.
-- Supports distribution planning and local pharmacy stock management.
-- Helps identify city-specific healthcare trends.
+Sample:
+[Most Common Conditions](images/2_most_common_conditions.png)
 
-Sample img: [Medications by Geography](images/5_medications_geography.png)
+---
 
-# 6. Common Procedures by City
-### 📝 Query Goal
-To determine which procedures are most common in each city relative to the population.
+## 3. Medication Frequency by Demographics
 
-### ⚙️ Steps / Logic
-- Count distinct patients per procedure per city (table_1).
-- Count total patients per city (table_2).
-- Calculate percentage of patients receiving each procedure (unique_patients / population).
+### 📝 Goal
 
-### 📊 Business Insights
-- Shows procedure demand per location.
-- Supports city-level healthcare resource allocation.
-- Helps identify localized health trends or procedure requirements.
+Analyze prescription patterns by age group and gender.
 
-Sample img: [Common Procedures by City](images/6_common_procedures.png)
+### ⚙️ Logic
 
-# 7. Year-over-Year Growth per Condition (by Age Group)
-### 📝 Query Goal
-To track the year-over-year growth of conditions per age group.
+* Join medications with the demographic view
+* Count total prescriptions and unique patients
+* Group by medication, gender, and age group
 
-### ⚙️ Steps / Logic
-- patient_age_group CTE → calculate total patients per age group (denominator).
-- total CTE → count unique patients per condition per year and age group; calculate percentage.
-- ranked CTE → get previous year’s percentage using LAG().
-- Final SELECT → calculate growth as (pct_patients - previous_pct) / previous_pct * 100.
+### 📊 Insight
 
-### 📊 Business Insights
-- Tracks trends in condition prevalence over time.
-- Highlights conditions that are increasing or decreasing per demographic.
-- Supports proactive healthcare interventions, resource planning, and longitudinal studies.
+Reveals prescribing patterns and potential over- or under-utilization across demographic segments.
 
-Sample img: [Year-over-Year Growth per Condition ](images/7_YoY.png)
+Sample:
+[Medication Frequency](images/3_medication_frequency.png)
+
+---
+
+## 4. Hospital Stay Duration by Condition
+
+### 📝 Goal
+
+Evaluate hospital stay duration per condition.
+
+### ⚙️ Logic
+
+* Join encounters with conditions
+* Filter valid timestamps and exclude extreme outliers (>365 days)
+* Calculate average, minimum, and maximum stay duration
+
+### 📊 Insight
+
+Supports capacity planning and identifies conditions requiring higher resource utilization.
+
+Sample:
+[Hospital Stay](images/4_hospital_stay.png)
+
+---
+
+## 5. Medications by Geography
+
+### 📝 Goal
+
+Analyze medication distribution by city.
+
+### ⚙️ Logic
+
+* Count total prescriptions and unique patients per medication and city
+* Calculate percentage of unique patients relative to total prescriptions
+
+### 📊 Insight
+
+Reveals geographic prescribing patterns and supports regional healthcare planning.
+
+Sample:
+[Geography](images/5_medications_geography.png)
+
+---
+
+## 6. Procedures by City
+
+### 📝 Goal
+
+Identify procedure demand relative to city population.
+
+### ⚙️ Logic
+
+* Count distinct patients per procedure per city
+* Compute total population per city
+* Normalize usage as a percentage
+
+### 📊 Insight
+
+Highlights location-based healthcare demand and supports resource allocation.
+
+Sample:
+[Procedures](images/6_common_procedures.png)
+
+---
+
+## 7. Year-over-Year Growth (Conditions)
+
+### 📝 Goal
+
+Track condition trends over time by age group.
+
+### ⚙️ Logic
+
+* Compute yearly patient percentages per condition
+* Use LAG() to retrieve previous year values
+* Calculate growth rate
+
+### 📊 Insight
+
+Enables trend analysis and supports proactive healthcare planning.
+
+Sample:
+[YoY Growth](images/7_YoY.png)
