@@ -37,7 +37,7 @@ SELECT  age_group,
 		gender
 FROM demographic
 GROUP BY age_group, gender
-ORDER BY age_group
+ORDER BY age_group;
 
 --2. What are the most common conditions diagnosed across patients?
 SELECT  COUNT(condition_id) AS condition_counter,
@@ -76,7 +76,7 @@ GROUP BY description, patient_id
 ORDER BY avg_stay_days DESC;
 
 --5. Medications by geography (city)
-WITH table_1 AS (
+WITH prescriptions_by_city  AS (
 	SELECT  m.description,
 			COUNT(DISTINCT p.patient_id) AS unique_prescriptions,
 			p.city
@@ -85,7 +85,7 @@ WITH table_1 AS (
 	GROUP BY m.description, p.city
 ),
 
-table_2 AS (
+total_prescriptions_by_city  AS ( 
 SELECT  m.description,
 			COUNT(p.patient_id) AS total_prescriptions,
 			p.city
@@ -94,18 +94,18 @@ SELECT  m.description,
 	GROUP BY m.description, p.city
 )
 
-SELECT  t1.description,
-		t1.city,
-		t1.unique_prescriptions,
-		t2.total_prescriptions,
-		ROUND(t1.unique_prescriptions::DECIMAL / t2.total_prescriptions * 100, 2) AS percentage_prescription
-FROM table_1 t1
-JOIN table_2 t2 ON t1.description = t2.description
-				AND t1.city = t2.city;
+SELECT  pc.description,
+		pc.city,
+		pc.unique_prescriptions,
+		tp.total_prescriptions,
+		ROUND(pc.unique_prescriptions::DECIMAL / tp.total_prescriptions * 100, 2) AS percentage_prescription
+FROM prescriptions_by_city pc
+JOIN total_prescriptions_by_city tp ON pc.description = tp.description
+				AND pc.city = tp.city;
 
 
 --6. Analyze which procedures are common in each city, state, or country
-WITH table_1 AS (
+WITH procedures_by_city AS (
 	SELECT p.description, COUNT(DISTINCT p.patient_id) AS unique_patients, px.city
 	FROM patients px
 	JOIN procedures p ON px.patient_id = p.patient_id
@@ -113,19 +113,19 @@ WITH table_1 AS (
 	ORDER BY COUNT(DISTINCT p.patient_id) DESC
 ),
 
-table_2 AS (
+total_procedures_by_city AS (
 	SELECT COUNT(patient_id) AS population, city
 	FROM patients
 	GROUP BY city
 )
 
-SELECT  t1.description,
-		t1.city,
-		t1.unique_patients,
-		t2.population,
-		ROUND(t1.unique_patients::DECIMAL / t2.population * 100, 2) AS percentage_patients
-FROM table_1 t1
-JOIN table_2 t2 ON t1.city = t2.city;
+SELECT  pc.description,
+		pc.city,
+		pc.unique_patients,
+		tpc.population,
+		ROUND(pc.unique_patients::DECIMAL / tpc.population * 100, 2) AS percentage_patients
+FROM procedures_by_city pc
+JOIN total_procedures_by_city tpc ON pc.city = tpc.city;
 
 
 --7. Year-over-Year Growth per Condition (by Age Group)
