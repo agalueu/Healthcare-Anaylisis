@@ -1,7 +1,11 @@
-/*For technical purposses and cleaner queries i will create a view with the information about patient_id,
-age, age group, and city, so this way we just join the tables we want to study into this one*/
+/* 
+This script contains analytical queries built on top of a reusable demographic view.
+The view simplifies joins by centralizing patient attributes such as age, age group, gender, and city.
+*/
 
--- Reusable demographic view
+-- =========================================
+-- DEMOGRAPHIC VIEW
+-- =========================================
 CREATE OR REPLACE VIEW demographic AS
 WITH age AS (
     SELECT  patient_id,
@@ -31,15 +35,19 @@ SELECT patient_id AS patient_id,
        city
 FROM age_groups;
 
---1. Age, gender distribution
+-- =========================================
+-- 1. Age & Gender Distribution
+-- =========================================
 SELECT  age_group,
-		COUNT(patient_id),
-		gender
+        gender,
+        COUNT(patient_id) AS total_patients
 FROM demographic
 GROUP BY age_group, gender
 ORDER BY age_group;
 
+-- =========================================
 --2. What are the most common conditions diagnosed across patients?
+-- =========================================
 SELECT  COUNT(condition_id) AS condition_counter,
 		description,
 		COUNT(DISTINCT patient_id) AS patients_per_condition,
@@ -49,7 +57,9 @@ GROUP BY description
 ORDER BY condition_counter DESC;
 
 
+-- =========================================
 --3. Medication frequency by age group & gender
+-- =========================================
 SELECT  m.description,
         d.gender,
         d.age_group,
@@ -60,7 +70,9 @@ FROM medications m
 JOIN demographic d ON m.patient_id = d.patient_id
 GROUP BY m.description, d.gender, d.age_group;
 
+-- =========================================
 --4. How long are patients typically staying in hospital by condition? (exclude extreme outliers (LOS > 365 days)
+-- =========================================
 SELECT  
     description,
     patient_id,
@@ -75,7 +87,9 @@ WHERE stop IS NOT NULL
 GROUP BY description, patient_id
 ORDER BY avg_stay_days DESC;
 
+-- =========================================
 --5. Medications by geography (city)
+-- =========================================
 WITH prescriptions_by_city  AS (
 	SELECT  m.description,
 			COUNT(DISTINCT p.patient_id) AS unique_prescriptions,
@@ -104,7 +118,9 @@ JOIN total_prescriptions_by_city tp ON pc.description = tp.description
 				AND pc.city = tp.city;
 
 
+-- =========================================
 --6. Analyze which procedures are common in each city, state, or country
+-- =========================================
 WITH procedures_by_city AS (
 	SELECT p.description, COUNT(DISTINCT p.patient_id) AS unique_patients, px.city
 	FROM patients px
@@ -128,7 +144,9 @@ FROM procedures_by_city pc
 JOIN total_procedures_by_city tpc ON pc.city = tpc.city;
 
 
+-- =========================================
 --7. Year-over-Year Growth per Condition (by Age Group)
+-- =========================================
 WITH patient_age_group AS (
     -- Total patients per age group (denominator for percentages)
     SELECT age_group, COUNT(patient_id) AS total_patients_per_age_group
