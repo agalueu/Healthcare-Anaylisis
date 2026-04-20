@@ -1,77 +1,107 @@
 # 🏥 Healthcare Analytics
+
 ### 📌 Overview
-This project analyzes synthetic healthcare data to uncover patient demographics, condition prevalence, medication usage, hospital stay patterns, procedure demand, and year-over-year trends. The goal is to simulate real-world healthcare analytics and demonstrate SQL, data modeling, and visualization skills.
+
+This project analyzes synthetic healthcare data to uncover insights related to patient demographics, condition prevalence, medication usage, hospital stay patterns, procedure demand, and year-over-year trends.
+
+The objective is to simulate a real-world healthcare analytics workflow and demonstrate skills in SQL, data modeling, and data visualization.
+
+---
 
 ### 📊 Dataset
-The dataset includes anonymized healthcare records with the following entities:
-- Patients → demographic information (birthdate, gender, city, etc.)
-- Conditions → medical conditions diagnosed per patient
-- Medications → prescriptions issued to patients
-- Encounters → hospital visits, admissions, and length of stay
-- Procedures → medical procedures performed
 
-The dataset is generated from Synthea, an open-source synthetic patient generator. It provides realistic but fully synthetic healthcare records (no real patient data).
+The dataset consists of anonymized healthcare records generated using **Synthea**, an open-source synthetic patient generator.
 
-Download: [Synthea GitHub Releases](https://synthea.mitre.org/downloads) - **COVID-19 10K, CSV | [mirror]: 54 MB**
+It includes the following entities:
 
-Data format: CSV files for patients, conditions, medications, encounters, and procedures
-Database: The CSVs were imported into PostgreSQL and structured following the provided [SQUEMA](sql/SCHEMA.sql)
+* **Patients** → demographic information (birthdate, gender, location, etc.)
+* **Encounters** → hospital visits and admission details
+* **Conditions** → diagnoses per patient
+* **Medications** → prescriptions issued
+* **Procedures** → medical procedures performed
+* **Observations** → clinical measurements
 
-⚠️ Note: The raw CSV files are not included in this repository due to size limits. Please download them directly from the official Synthea project and load into PostgreSQL to reproduce the analysis.
+⚠️ This dataset is fully synthetic. No real patient data is used.
 
-### 🌐 Original Data Source
-The dataset was obtained from a synthetic healthcare data generator (Synthea). It includes patient demographics, encounters, procedures, conditions, and medications.
+Download dataset:
+https://synthea.mitre.org/downloads
+Recommended: **COVID-19 10K (CSV ~54MB)**
+
+---
 
 ### 🛠️ Tools & Technologies
-- PostgreSQL → database storage and querying
-- SQL (CTEs, Window Functions, Aggregations) → data analysis
-- Power BI → interactive dashboards and data visualization
-- dbdiagram.io → Entity Relationship Diagram (ERD)
+
+* PostgreSQL → database design and querying
+* SQL → CTEs, window functions, aggregations
+* Power BI → dashboards and visualization
+* dbdiagram.io → ERD design
+
+---
 
 ### ❓ Key Business Questions
+
 1. What is the distribution of patients by age group and gender?
 2. What are the most common medical conditions?
-3. How does medication usage vary by age group, gender, and geography?
-4. What are the typical hospital stay durations for different conditions?
-5 Which procedures are most common in each city?
-6. How do conditions grow or decline year-over-year by age group?
+3. How does medication usage vary across demographics and geography?
+4. What are typical hospital stay durations by condition?
+5. Which procedures are most common across cities?
+6. How do conditions evolve year-over-year by age group?
 
-All these questions are analysed on [Analysis resume](Analysis_resume.md)
-for queries [Analysis](sql/Analysis.sql)
+---
 
 ### 📂 Repository Structure
-- docs/                  → ERD
-- images/                → screenshots of dashboards (Power BI) and query results (pgAdmin)
-- sql/                   → database schema, load script, and analysis queries
-- Analysis_resume.md     → All queries analysis used for this repository
-- README.md              → project summary and instructions  
 
-### 🗄 Database Schema & ERD
+* `docs/` → ERD diagram
+* `images/` → query results and Power BI dashboards
+* `sql/` → schema and analysis queries
+* `analysis_resume.md` → explanation of analytical queries
+* `README.md` → project documentation
 
-The database contains tables for patients, encounters, conditions, procedures, medications, and observations.
-The ERD illustrates relationships such as one patient having multiple encounters, and each encounter being linked to procedures and conditions.
+---
 
-### 📌 Entity-Relationship Diagram (ERD):
+### 🗄️ Database Schema
+
+The database follows a patient-centric model:
+
+* One patient → multiple encounters
+* Each encounter → linked to conditions, medications, and procedures
+
+📌 ERD:
 ![ERD](docs/ERD.png)
 
-### 🔗 Relationships (ERD)
-The database schema connects patients with their encounters, conditions, medications, and procedures. The ERD is included in the /docs folder for visualization of table relationships.
+---
 
 ### 🔄 How to Reproduce
-- Create a PostgreSQL database:
-      * In pgAdmin → right-click Databases → Create - Database → name it `Healthcare` (or any name you preffer).
-- Schema & Data Import:
-      * Run the schema script in [SCHEMA](sql/SCHEMA.sql) to create all tables and insert data.
-- Sample queries:
-      * Analytical SQL queries are available in [Analysis](sql/Analysis.sql).
-      * These queries can be run in pgAdmin or connected directly to Power BI for visualization.
+
+1. Create a PostgreSQL database
+2. Run:
+
+   * `sql/schema.sql`
+3. Load CSV files (update file paths as needed)
+4. Run analysis queries:
+
+   * `sql/analysis.sql`
+5. (Optional) Connect Power BI for visualization
+
+---
 
 ### 📈 Power BI Dashboard
-An interactive dashboard was created in Power BI to visualize key insights such as patient demographics, condition and prescription prevalence, most observations on patients and some more. This dashboard translates SQL queries into intuitive charts for business users.
 
-Overall sample: [Overall Chart](images/overall_dashboard.png)
+The dashboard visualizes:
+
+* Patient demographics
+* Condition prevalence
+* Medication patterns
+* Geographic insights
+
+Sample:
+[Overall Dashboard](images/overall_dashboard.png)
+
+---
 
 ### ✅ Key Takeaways
-- Age and comorbidities strongly influence hospitalization rates.
-- Preventive care reduces readmission likelihood.
-- Certain conditions (e.g., chronic diseases) are linked to longer treatment durations.
+
+* Demographics strongly influence healthcare demand
+* Chronic conditions are associated with longer treatment cycles
+* Geographic patterns impact medication and procedure distribution
+* Year-over-year trends help identify emerging health risks
